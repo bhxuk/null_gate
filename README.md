@@ -91,8 +91,9 @@ The installer:
 1. Checks Docker, Compose and Git are installed.
 2. Creates `data/` and a `.env` file.
 3. Detects your server's LAN address, your user and group IDs and your time zone.
-4. Builds the image and starts the container.
-5. Prints the address to open, for example `http://192.168.1.20:8088`.
+4. Scans for ports already in use (by other services and Docker containers) and lets you pick a free one.
+5. Builds the image and starts the container.
+6. Prints the address to open, for example `http://192.168.1.20:4242`.
 
 ```text
   ▦  null_gate  ▌
@@ -103,12 +104,29 @@ The installer:
 
 › Checking Docker, Compose and Git
 › Creating .env
+› Looking for a free port
+
+  Port 8088 is already in use on this server. Pick a free one:
+
+    1)  4242   the answer, twice
+    2)  7777   lucky sevens
+    3)  3141   pi
+    4)  8484   easy to type
+    5)  6060   clean and round
+    6)  5050   fifty-fifty
+    c)  custom port
+
+  Choice [Enter = 4242]: 1
+  Using port 4242
+
 › Building and starting the container (the first build takes a minute)
 
   ✓ null_gate is running
 
-    Open   http://192.168.1.20:8088
+    Open   http://192.168.1.20:4242
 ```
+
+Only free ports are listed. Press Enter for the first one, type its number, type any free port, or `c` for a custom one. To skip the question, set the port up front: `NULL_GATE_PORT=8090 bash install.sh`. Run `bash install.sh` again any time to change the port; your data and settings are kept.
 
 If the detected address is wrong (servers with several network cards), run `LAN_IP=192.168.1.50 bash install.sh`, or edit `.env` and run `docker compose up -d`.
 
@@ -269,7 +287,7 @@ docker compose restart null_gate
 | Page will not open | Check `LAN_IP` in `.env` belongs to the server and your firewall allows the port (`sudo ufw allow 8088/tcp`) |
 | Permission denied | Set `PUID`/`PGID` to the checkout owner and make `data/` writable, then `docker compose up -d` |
 | "Host not allowed" | Use the IP or a `.local` name, or add your DNS name to `NULL_GATE_HOSTNAMES` |
-| Port already in use | Change `NULL_GATE_PORT` in `.env` and run `docker compose up -d` |
+| Port already in use | Run `bash install.sh` again and pick a free port from the list |
 | Update refused | Run `git status`. Commit or stash local edits; `.env` and `data/` are ignored by Git |
 | Dashboard data unreadable | null_gate will not reset it. Stop the container and restore a snapshot from `data/backups/` |
 | Weather missing | The server needs internet access to reach `api.open-meteo.com` |

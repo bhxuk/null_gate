@@ -177,14 +177,25 @@ bash install.sh</span>
 
 <span class="c">›</span> Checking Docker, Compose and Git
 <span class="c">›</span> Creating .env
+<span class="c">›</span> Looking for a free port
+
+  <span class="y">Port 8088 is already in use.</span> Pick a free one:
+
+    <span class="c">1)</span>  <b>4242</b>   <span class="d">the answer, twice</span>
+    <span class="c">2)</span>  <b>7777</b>   <span class="d">lucky sevens</span>
+    <span class="c">3)</span>  <b>3141</b>   <span class="d">pi</span>
+    <span class="c">c)</span>  custom port
+
+  Choice [Enter = 4242]: 1
+
 <span class="c">›</span> Building and starting the container
 
 <span class="g">  ✓ null_gate is running</span>
 
-    Open   <b>http://192.168.1.20:8088</b></pre>
+    Open   <b>http://192.168.1.20:4242</b></pre>
     </div>
     <div class="install-notes">
-      <div><span>01</span><p><b>Run the installer.</b>It finds your LAN address, user and time zone, writes <code>.env</code> and starts the container.</p></div>
+      <div><span>01</span><p><b>Run the installer.</b>It finds your LAN address, user and time zone, checks which ports are taken and lets you pick a free one, then starts the container.</p></div>
       <div><span>02</span><p><b>Open the address it prints.</b>Add links, import bookmarks or click <em>Server apps</em> to add your homelab in one go.</p></div>
       <div><span>03</span><p><b>Connect Home Assistant (optional).</b>Paste its address and a long-lived token in Settings → Smart home.</p></div>
       <div><span>04</span><p><b>Forget about it.</b>Updates install themselves. Turn that off any time in Settings → Updates.</p></div>

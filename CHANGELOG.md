@@ -3,6 +3,12 @@
 All notable changes to null_gate are listed here. Versions follow [semantic versioning](https://semver.org/).
 Each release is published on [GitHub Releases](https://github.com/bhxuk/null_gate/releases), and installs pick it up automatically.
 
+## [1.0.1] - 2026-11-04
+
+- **The installer now finds a free port.** It checks which ports are already used by other services and Docker containers, then lets you pick from a short list of free, easy-to-remember ports (4242, 7777, 3141…), type your own, or press Enter for the first one. This fixes installs failing with "port is already allocated" when 8088 was taken.
+- Run `bash install.sh` again at any time to change the port. Your data and settings are kept.
+- Set `NULL_GATE_PORT=8090 bash install.sh` to skip the question.
+
 ## [1.0.0] - 2026-11-04
 
 First public release of null_gate, a self-hosted dashboard for your local network. Designed by [bhxuk.com](https://bhxuk.com).

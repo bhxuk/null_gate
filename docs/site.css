@@ -137,6 +137,7 @@ main section { padding: 96px 0 0; }
 .terminal .c { color: var(--accent); }
 .terminal .d { color: var(--dim); }
 .terminal .g { color: var(--mint); font-weight: 700; }
+.terminal .y { color: var(--amber); }
 .install-notes { display: grid; gap: 12px; }
 .install-notes div { display: flex; gap: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
 .install-notes span { font: 700 13px var(--mono); color: var(--accent); padding-top: 2px; }
