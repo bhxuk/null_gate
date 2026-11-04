@@ -90,7 +90,7 @@ function overviewView() {
       h('h1', {}, greeting(s.settings.timezone) + '.'),
       h('p', { class: 'dim' }, `${s.links.length} links · ${s.categories.length} categories` + (app.home.config.configured ? ` · ${homeCount()} smart devices` : '')),
       statusChips(), actions) },
-    { id: 'clock', title: 'Clock', w: 5, h: 7, build: () => clockPanel() },
+    { id: 'clock', title: 'Clock', w: 5, h: 5, build: () => clockPanel() },
     { id: 'weather', title: 'Weather', w: 8, h: 7, build: () => weatherPanel() },
     { id: 'quote', title: 'Quote of the day', w: 4, h: 7, build: () => quotePanel() },
     { id: 'devices', title: 'Smart home', w: 12, h: 8, build: () => favouriteDevices() },
