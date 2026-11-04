@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#060a0f">
+  <meta name="description" content="null_gate: your links, homelab apps and smart home in one self-hosted dashboard. Designed by bhxuk.com.">
+  <title>null_gate · Your everyday launchpad</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="app.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body data-theme="dark" data-background="aurora">
+<div id="demoBanner" class="demo-banner" hidden>INTERACTIVE DEMO · Changes stay in this browser. <a href="https://github.com/bhxuk/null_gate#install">Run null_gate on your server ↗</a></div>
+
+<div id="updateBanner" class="update-banner" role="status" hidden></div>
+
+<header class="top">
+  <button id="menuToggle" class="iconbtn menu-toggle" aria-label="Open menu">☰</button>
+  <a class="logo" href="#overview"><span class="mark">▦</span> null_gate<span class="cursor"></span></a>
+  <span class="divider"></span>
+  <span class="top-sub" id="topName">YOUR EVERYDAY LAUNCHPAD</span>
+  <label class="search">
+    <span aria-hidden="true">⌕</span>
+    <input id="search" type="search" placeholder="Search links and devices…" aria-label="Search links and devices" autocomplete="off">
+    <kbd>/</kbd>
+  </label>
+  <div id="quickBar" class="quick-bar" aria-label="Quick lights"></div>
+  <span class="pill" id="connectionPill"><i></i><span id="connection">LOCAL NETWORK</span></span>
+  <button id="themeToggle" class="iconbtn" aria-label="Toggle light and dark theme">◐</button>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-label">WORKSPACE</div>
+    <nav id="mainNav" aria-label="Dashboard views"></nav>
+    <div class="side-label side-gap">SMART HOME</div>
+    <nav id="homeNav" aria-label="Smart home views"></nav>
+    <div class="side-title"><span class="side-label">CATEGORIES</span><button class="iconbtn" id="addCategory" aria-label="Manage categories">+</button></div>
+    <nav id="categoryNav" aria-label="Link categories"></nav>
+    <div class="side-bottom">
+      <button id="openSettings" class="navitem"><b>⚙</b><span>Settings & updates</span></button>
+      <div class="side-foot"><span class="mark mini">▦</span><div><b>Made for your homelab.</b><span>null_gate <span id="version">—</span> · <a href="https://bhxuk.com" target="_blank" rel="noopener">bhxuk.com</a></span></div></div>
+    </div>
+  </aside>
+
+  <main id="main" tabindex="-1">
+    <div id="view"></div>
+    <footer><span>▦ null_gate · A home for your internet.</span><span id="saveState">Stored on your server</span></footer>
+  </main>
+</div>
+
+<!-- Link editor -->
+<dialog id="linkDialog">
+  <form id="linkForm" method="dialog">
+    <div class="dialog-head"><div><div class="eyebrow">MAKE IT YOURS</div><h2 id="linkTitle">Add a link</h2></div><button type="button" class="iconbtn" data-close aria-label="Close">✕</button></div>
+    <div class="form-grid">
+      <label>Name<input name="name" maxlength="80" required placeholder="e.g. Plex"></label>
+      <label>Category<select name="category" required></select></label>
+      <label class="wide">Website or app URL<input name="url" type="url" required maxlength="2048" placeholder="http://192.168.0.10:32400/web"></label>
+      <label class="wide">Description <span class="dim">(optional)</span><textarea name="description" maxlength="500" rows="2" placeholder="What lives here?"></textarea></label>
+      <label>Icon / initials<input name="icon" maxlength="8" placeholder="▶ or PX"></label>
+      <label>Accent colour<select name="color"></select></label>
+      <label class="wide">Preview image URL <span class="dim">(optional)</span><input name="image" type="url" maxlength="2048" placeholder="https://example.com/preview.jpg"></label>
+      <label class="checklabel wide"><input name="pinned" type="checkbox"> Pin to favourites</label>
+    </div>
+    <div class="dialog-foot"><button type="button" id="deleteLink" class="btn danger" hidden>Delete</button><span class="spacer"></span><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">Save link</button></div>
+  </form>
+</dialog>
+
+<!-- Categories -->
+<dialog id="categoryDialog">
+  <div class="dialog-head"><div><div class="eyebrow">A PLACE FOR EVERYTHING</div><h2>Categories</h2></div><button class="iconbtn" data-close aria-label="Close">✕</button></div>
+  <div id="categoryList" class="category-list"></div>
+  <form id="categoryForm" class="inline-form"><input name="icon" maxlength="8" placeholder="◈" aria-label="Category icon" class="icon-input"><input name="name" placeholder="New category name" maxlength="40" required aria-label="Category name"><button class="btn primary">+ Add</button></form>
+  <p class="hint">Delete a category to move its links into another one.</p>
+</dialog>
+
+<!-- Bulk import -->
+<dialog id="bulkDialog" class="wide-dialog">
+  <div class="dialog-head"><div><div class="eyebrow">YOUR LINKS, ALL AT ONCE</div><h2>Import links</h2></div><button class="iconbtn" data-close aria-label="Close">✕</button></div>
+  <p class="hint">Paste one URL per line, or <b>Name | URL | Category</b>. CSV/TSV, Markdown links and browser bookmark exports (Chrome, Edge, Firefox, Safari → Export bookmarks) all work.</p>
+  <textarea id="bulkText" rows="6" aria-label="Links to import" placeholder="Plex | http://192.168.0.10:32400/web | Media&#10;GitHub | https://github.com | Tools&#10;https://example.com"></textarea>
+  <div class="row">
+    <button class="btn primary" id="bulkReview">Review links</button>
+    <button class="btn" id="bulkChoose">Choose files…</button>
+    <input id="bulkFiles" type="file" multiple accept=".txt,.csv,.tsv,.md,.url,.webloc,.html,.htm,.lnk" hidden>
+    <span class="spacer"></span>
+    <label class="inline">Default category <select id="bulkCategory"></select></label>
+    <label class="checklabel"><input id="bulkPinned" type="checkbox"> Pin all</label>
+  </div>
+  <div id="bulkSummary" class="notice" role="status" hidden></div>
+  <div id="bulkTable" class="table-wrap" hidden></div>
+  <div class="dialog-foot"><button class="btn" data-close>Cancel</button><span class="spacer"></span><button id="bulkApply" class="btn primary" disabled>Import selected</button></div>
+</dialog>
+
+<!-- Homelab apps -->
+<dialog id="appsDialog" class="wide-dialog">
+  <form id="appsForm" method="dialog">
+    <div class="dialog-head"><div><div class="eyebrow">THE WHOLE HOMELAB, ONE PLACE</div><h2>Add your server apps</h2></div><button type="button" class="iconbtn" data-close aria-label="Close">✕</button></div>
+    <div class="form-grid">
+      <label>Server address<input id="appsHost" required placeholder="192.168.0.10"></label>
+      <label>Category<select id="appsCategory"></select></label>
+    </div>
+    <p class="hint">Tick the apps you run. Ports are the usual defaults; change any that differ. Apps you have already added are marked.</p>
+    <div id="appsList" class="apps-list"></div>
+    <div class="dialog-foot"><button type="button" class="btn" id="appsAll">Select all</button><span class="spacer"></span><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">Add selected apps</button></div>
+  </form>
+</dialog>
+
+<!-- Settings -->
+<dialog id="settingsDialog" class="wide-dialog">
+  <div class="dialog-head"><div><div class="eyebrow">YOUR DASHBOARD, YOUR WAY</div><h2>Settings & updates</h2></div><button class="iconbtn" data-close aria-label="Close">✕</button></div>
+  <div class="tabs" role="tablist" id="settingsTabs">
+    <button role="tab" data-tab="appearance" class="active">Appearance</button>
+    <button role="tab" data-tab="home">Smart home</button>
+    <button role="tab" data-tab="data">Data & backup</button>
+    <button role="tab" data-tab="updates">Updates</button>
+  </div>
+  <section data-panel="appearance">
+    <form id="appearanceForm" class="form-grid">
+      <label class="wide">Dashboard name<input name="name" maxlength="60"></label>
+      <label>Theme<select name="theme"><option value="dark">Midnight</option><option value="light">Daylight</option></select></label>
+      <label>Background<select name="background"><option value="aurora">Aurora glow</option><option value="plain">Plain</option><option value="grid">Subtle grid</option></select></label>
+      <label>Accent<select name="accent"></select></label>
+      <label>Link layout<select name="layout"><option value="compact">Compact cards</option><option value="cards">Large cards</option><option value="table">List</option><option value="tv">TV launcher</option></select></label>
+      <label>Main clock time zone<input name="timezone" required placeholder="Europe/London" list="zones"></label>
+      <label>World clocks <span class="dim">(comma separated)</span><input name="clocks" placeholder="America/New_York, UTC, Asia/Tokyo" list="zones"></label>
+      <label>Clock theme<select name="clockTheme"><option value="neon">Neon</option><option value="minimal">Minimal</option><option value="widget">Widget</option><option value="retro">Retro LED</option><option value="flip">Flip</option><option value="analog">Analog</option></select></label>
+      <label>Clock format<select name="clock24"><option value="24">24-hour</option><option value="12">12-hour</option></select></label>
+      <div class="wide"><button class="btn primary">Save appearance</button></div>
+    </form>
+    <datalist id="zones"></datalist>
+    <h3 class="settings-sub">Weather location</h3>
+    <form id="weatherForm" class="inline-form"><input name="q" placeholder="Town or city, e.g. Birmingham" aria-label="Weather location" maxlength="80"><button class="btn">Find</button></form>
+    <p class="hint" id="weatherCurrent"></p>
+    <div id="weatherResults" class="place-results"></div>
+  </section>
+  <section data-panel="home" hidden>
+    <h3>Connect Home Assistant</h3>
+    <p>null_gate controls your lights, Aqara cameras and Google/Nest devices through <b>Home Assistant</b>, so add them there first. null_gate stores the token on your server and never sends it to the browser.</p>
+    <form id="haForm" class="form-grid">
+      <label class="wide">Home Assistant address<input name="url" required placeholder="http://192.168.0.10:8123"></label>
+      <label class="wide">Long-lived access token<input name="token" type="password" autocomplete="off" placeholder="Paste token (leave blank to keep the saved one)"></label>
+      <label class="checklabel wide"><input name="verifyTls" type="checkbox" checked> Verify HTTPS certificate <span class="dim">(untick for a self-signed certificate)</span></label>
+      <label>Camera refresh<select name="cameraInterval"><option value="3">Every 3 s</option><option value="5">Every 5 s</option><option value="10">Every 10 s</option><option value="30">Every 30 s</option><option value="60">Every minute</option></select></label>
+      <div class="wide row"><button class="btn primary">Test & save</button><button type="button" class="btn danger" id="haDisconnect" hidden>Disconnect</button><span id="haStatus" class="hint"></span></div>
+    </form>
+    <details class="guide">
+      <summary>How to get a token and add your devices</summary>
+      <ol>
+        <li><b>Token:</b> open Home Assistant → click your name (bottom left) → <b>Security</b> → <b>Long-lived access tokens</b> → <b>Create token</b>. Name it “null_gate”, copy it and paste it above.</li>
+        <li><b>Google Nest speakers, Nest Hubs and Chromecasts:</b> Settings → Devices &amp; services. They are usually discovered automatically as <b>Google Cast</b>; click <b>Configure</b>. For Nest thermostats and cameras add the <b>Google Nest</b> integration.</li>
+        <li><b>Aqara cameras and hubs (G2H Pro, G3, G5, M2, M3):</b> add with the <b>HomeKit Device</b> integration using the HomeKit code on the device. The Aqara M3 also works over <b>Matter</b>. For a smoother live view, turn on <b>RTSP LAN preview</b> in the Aqara Home app and add the <code>rtsp://</code> address with the <b>Generic Camera</b> integration.</li>
+        <li><b>Smart bulbs:</b> add the matching integration (Philips Hue, TP-Link Kasa/Tapo, LIFX, WiZ, Govee, Yeelight, Tuya, IKEA, Matter…). Bulbs you control in the Google Home app can also be linked through that brand's integration.</li>
+        <li>Back in null_gate, open <b>Smart home</b>. Star ★ a device to pin it to your overview.</li>
+      </ol>
+    </details>
+  </section>
+  <section data-panel="data" hidden>
+    <h3>Keep a copy of your space</h3>
+    <p>Export your links, categories, notes, tasks, appearance and smart home favourites as a JSON file. Import it to restore or move your dashboard. Your Home Assistant token is not included.</p>
+    <div class="row"><button class="btn primary" id="exportData">↓ Export backup</button><button class="btn" id="importData">↑ Import backup</button><input type="file" id="importFile" accept=".json,application/json" hidden><button class="btn" id="snapshotData">Create server snapshot</button></div>
+    <p class="hint">Snapshots are saved to <code>data/backups/</code> on the server. Imports and updates create one automatically.</p>
+    <div class="notice">No login is enabled. Keep null_gate on your trusted home network; anyone who can reach it can edit the dashboard and switch your devices.</div>
+  </section>
+  <section data-panel="updates" hidden>
+    <div class="version-grid"><div><span>INSTALLED</span><b id="installedVersion">—</b></div><div><span>LATEST</span><b id="latestVersion">—</b></div><div><span>CHANNEL</span><b>Stable</b></div></div>
+    <p id="updateMessage">Check GitHub for a published release.</p>
+    <label class="checklabel"><input type="checkbox" id="autoUpdate"> Install updates automatically <span class="dim">(checks every hour; backs up first and rolls back if anything fails)</span></label>
+    <div class="row"><button class="btn" id="checkUpdates">Check for updates</button><button class="btn primary" id="applyUpdate" hidden>Update now ↗</button></div>
+    <pre id="updateLog" hidden></pre>
+    <form id="tokenForm" class="token-form">
+      <h3>GitHub token (optional)</h3>
+      <p>Not needed for normal use: null_gate is public and updates without a token. Add one only if you hit GitHub rate limits or update from a private fork. Create it at GitHub → Settings → Developer settings → <b>Fine-grained tokens</b> with <b>Contents: Read-only</b>. The token is stored on your server only.</p>
+      <div class="inline-form"><input name="token" type="password" autocomplete="off" placeholder="github_pat_…" aria-label="GitHub token"><button class="btn primary">Save token</button><button type="button" class="btn danger" id="removeToken" hidden>Remove</button></div>
+      <p class="hint" id="tokenStatus"></p>
+    </form>
+    <h3>Changelog</h3>
+    <pre id="changelog" class="changelog">Loading…</pre>
+  </section>
+</dialog>
+
+<!-- Camera live view -->
+<dialog id="cameraDialog" class="camera-dialog">
+  <div class="dialog-head"><h2 id="cameraTitle">Camera</h2><span class="live-badge"><i></i>LIVE</span><span class="spacer"></span><button class="iconbtn" data-close aria-label="Close camera">✕</button></div>
+  <div class="camera-stage"><img id="cameraLive" alt=""></div>
+  <p class="hint">Live view streams through Home Assistant. If it stays black, the camera may only provide snapshots.</p>
+</dialog>
+
+<!-- Website preview -->
+<dialog id="previewDialog" class="preview-dialog">
+  <div class="dialog-head"><h2 id="previewTitle">Preview</h2><span class="spacer"></span><a id="previewOpen" class="btn" target="_blank" rel="noopener noreferrer">Open ↗</a><button class="iconbtn" data-close aria-label="Close preview">✕</button></div>
+  <p class="hint">Many sites block being shown inside another page. If this stays blank, use Open.</p>
+  <iframe id="previewFrame" title="Website preview" sandbox="allow-scripts allow-forms allow-same-origin" referrerpolicy="no-referrer"></iframe>
+</dialog>
+
+<dialog id="quickDialog">
+  <div class="dialog-head"><div><div class="eyebrow">ALWAYS WITHIN REACH</div><h2>Quick lights</h2></div><button class="iconbtn" data-close aria-label="Close">✕</button></div>
+  <p class="hint">Tick up to 12 lights or switches to show as small buttons in the top bar on every page.</p>
+  <input id="quickSearch" type="search" placeholder="Filter…" aria-label="Filter devices">
+  <div id="quickList" class="quick-list"></div>
+</dialog>
+
+<dialog id="confirmDialog" class="confirm-dialog">
+  <p id="confirmText"></p>
+  <div class="dialog-foot"><span class="spacer"></span><button class="btn" data-close>Cancel</button><button class="btn danger" id="confirmOk">Confirm</button></div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

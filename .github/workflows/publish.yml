@@ -1,0 +1,142 @@
+name: Test, release and publish
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: null_gate-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Test app and Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: API, storage, access and update recovery tests
+        run: python -m unittest discover -s tests -v
+      - name: Frontend and shell syntax
+        run: |
+          for f in app/static/js/*.js; do node --check "$f"; done
+          node --test tests/importer.test.mjs
+          node --check docs/site.js
+          bash -n install.sh
+      - name: Check version, changelog and website
+        run: |
+          python scripts/build_preview.py
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          v=Path('app/VERSION').read_text().strip()
+          assert re.fullmatch(r'\d+\.\d+\.\d+', v), 'Invalid app version'
+          assert f'## [{v}]' in Path('CHANGELOG.md').read_text(), 'Missing changelog entry'
+          for img in ['overview', 'links', 'tv', 'home', 'light', 'mobile']:
+              assert Path(f'docs/img/{img}.jpg').is_file(), f'Missing screenshot {img}'
+          PY
+      - name: Build and smoke test Docker
+        run: |
+          docker build -t null_gate:test .
+          docker run -d --name null_gate-ci -p 127.0.0.1:8088:8088 null_gate:test
+          ready=0
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8088/api/health; then ready=1; break; fi
+            sleep 1
+          done
+          test "$ready" = 1 || { docker logs null_gate-ci; exit 1; }
+          curl -fsS http://127.0.0.1:8088/api/state > /dev/null
+          docker inspect --format='{{.Config.User}}' null_gate-ci | grep -qx nullgate
+          docker logs null_gate-ci
+          docker rm -f null_gate-ci
+
+  release:
+    name: Publish stable release and container
+    if: github.event_name != 'pull_request'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read version and release notes
+        id: version
+        run: |
+          echo "value=$(tr -d '[:space:]' < app/VERSION)" >> "$GITHUB_OUTPUT"
+          python - <<'PY'
+          from pathlib import Path
+          v=Path('app/VERSION').read_text().strip()
+          text=Path('CHANGELOG.md').read_text()
+          entry=text.split(f'## [{v}]',1)[1].split('\n## ',1)[0]
+          Path('/tmp/null_gate-release-notes.md').write_text('## null_gate '+v+'\n\n'+entry.split('\n',1)[1].strip()+'\n\n[Website](https://bhxuk.github.io/null_gate/) · [Install guide](https://github.com/bhxuk/null_gate#install) · Designed by [bhxuk.com](https://bhxuk.com)\n')
+          PY
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish container
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ghcr.io/bhxuk/null_gate:latest
+            ghcr.io/bhxuk/null_gate:${{ steps.version.outputs.value }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/bhxuk/null_gate
+            org.opencontainers.image.description=null_gate self-hosted LAN dashboard. Designed by bhxuk.com
+            org.opencontainers.image.version=${{ steps.version.outputs.value }}
+            org.opencontainers.image.licenses=MIT
+      - name: Publish versioned GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          if gh release view "v$VERSION" > /dev/null 2>&1; then
+            echo "Release v$VERSION already exists; keeping its immutable tag."
+          else
+            gh release create "v$VERSION" --target "$GITHUB_SHA" --title "null_gate v$VERSION" --notes-file /tmp/null_gate-release-notes.md --latest
+          fi
+
+  pages:
+    name: Publish website
+    # GitHub Pages for private repositories needs a paid plan, so skip it then.
+    if: github.event_name != 'pull_request' && !github.event.repository.private
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

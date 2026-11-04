@@ -1,0 +1,7 @@
+.git
+.env
+data
+preview
+__pycache__
+*.pyc
+node_modules

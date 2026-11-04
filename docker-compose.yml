@@ -1,0 +1,22 @@
+services:
+  null_gate:
+    build: .
+    image: null_gate:local
+    container_name: null_gate
+    restart: unless-stopped
+    user: "${PUID:-1000}:${PGID:-1000}"
+    ports:
+      # Bind to the server's specific LAN address. No public interface by default.
+      - "${LAN_IP:-127.0.0.1}:${NULL_GATE_PORT:-8088}:8088"
+    environment:
+      DATA_DIR: /data
+      PORT: "8088"
+      INSTALL_METHOD: docker
+      NULL_GATE_HOSTNAMES: "${NULL_GATE_HOSTNAMES:-}"
+      TZ: "${TZ:-UTC}"
+    volumes:
+      - ./:/app
+      - ./data:/data
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 15s

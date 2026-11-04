@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#060a0f">
+<title>null_gate · Your everyday launchpad</title>
+<meta name="description" content="null_gate is a self-hosted dashboard for your local network: links, homelab apps, clocks, weather and your smart home in one Docker container. Designed by bhxuk.com.">
+<meta property="og:title" content="null_gate · Your everyday launchpad">
+<meta property="og:description" content="Your links, homelab apps and smart home in one self-hosted Docker dashboard. Designed by bhxuk.com.">
+<meta property="og:image" content="https://bhxuk.github.io/null_gate/img/overview.jpg">
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="site.css">
+<script defer src="site.js"></script>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap nav">
+    <a class="logo" href="#"><img src="icon.svg" width="30" height="30" alt="">null_gate<span class="cursor"></span></a>
+    <div class="navlinks">
+      <a href="#tour">Tour</a><a href="#how">How it works</a><a href="#install">Install</a><a href="https://github.com/bhxuk/null_gate/blob/main/CHANGELOG.md">Changelog</a>
+    </div>
+    <a class="button small" href="https://github.com/bhxuk/null_gate">GitHub ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="grid-bg"></div>
+  <div class="wrap">
+    <div class="eyebrow"><i></i> SELF-HOSTED · LOCAL-FIRST · OPEN SOURCE</div>
+    <h1>A home for<br><span>your internet.</span></h1>
+    <p class="lede">Your links, your homelab apps, the time, the weather and your smart home.
+      One fast dashboard that lives on your own server and never leaves your network.</p>
+    <div class="cta">
+      <a class="button primary" href="#install">Install with Docker</a>
+      <a class="button" href="https://github.com/bhxuk/null_gate">View the source ↗</a>
+    </div>
+    <div class="meta"><span>No login</span><span>No cloud account</span><span>No build step</span><span>MIT licence</span></div>
+    <figure class="window">
+      <div class="windowbar"><i></i><i></i><i></i><span>your-server.local:8088</span><b>YOUR NETWORK. YOUR SPACE.</b></div>
+      <img src="img/overview.jpg" alt="null_gate overview with a live clock, world clocks, weather, quick lights and smart home status" width="1440" height="960">
+    </figure>
+  </div>
+</header>
+
+<main>
+
+<section class="wrap" id="tour">
+  <div class="kicker">TAKE A LOOK AROUND</div>
+  <div class="section-intro">
+    <h2>One dashboard.<br>Every way you work.</h2>
+    <p>These are real screens from null_gate running with sample data. Pick a view to see it.</p>
+  </div>
+  <div class="tour">
+    <div class="tabs" role="tablist" aria-label="Screens">
+      <button role="tab" aria-selected="true" data-shot="overview">Overview</button>
+      <button role="tab" aria-selected="false" data-shot="links">Links</button>
+      <button role="tab" aria-selected="false" data-shot="tv">TV launcher</button>
+      <button role="tab" aria-selected="false" data-shot="home">Smart home</button>
+      <button role="tab" aria-selected="false" data-shot="light">Light theme</button>
+      <button role="tab" aria-selected="false" data-shot="mobile">Phone</button>
+    </div>
+    <div class="tour-stage">
+      <figure class="window shot"><img id="tourImg" src="img/overview.jpg" alt="" width="1440" height="960"></figure>
+      <aside class="tour-copy" aria-live="polite">
+        <h3 id="tourTitle">Overview</h3>
+        <p id="tourText"></p>
+        <ul id="tourList"></ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="features">
+  <div class="kicker">LESS SEARCHING. MORE DOING.</div>
+  <div class="features">
+    <article><span class="fi">▦</span><h3>Links, organised</h3><p>Categories, favourites, search and drag and drop. Paste a list or import browser bookmarks, <code>.url</code>, <code>.webloc</code>, CSV or Markdown.</p></article>
+    <article><span class="fi violet">◷</span><h3>Clock and weather</h3><p>Six clock themes, world clocks, a daylight bar and live weather with an animated sky. No API key needed.</p></article>
+    <article><span class="fi mint">▣</span><h3>Homelab starter</h3><p>One click adds Plex, the *arr apps, qBittorrent, Home Assistant, Portainer, Glances and more, with editable ports.</p></article>
+    <article><span class="fi amber">💡</span><h3>Smart home</h3><p>Lights, speakers, thermostats, plugs, scenes and cameras through Home Assistant. Pin your favourites to the top bar.</p></article>
+    <article><span class="fi pink">◐</span><h3>Make it yours</h3><p>Resizable overview tiles, four link layouts, dark and light themes, six accents and three backgrounds.</p></article>
+    <article><span class="fi blue">↻</span><h3>Updates itself</h3><p>New releases install automatically, with a snapshot first and an automatic rollback if anything fails.</p></article>
+  </div>
+</section>
+
+<section class="band" id="how">
+  <div class="wrap">
+    <div class="kicker">HOW IT WORKS</div>
+    <div class="section-intro">
+      <h2>Small on purpose.</h2>
+      <p>One Docker container runs one Python service with no third-party packages. Your browser talks to it over your LAN; everything you save lands in a folder on your server.</p>
+    </div>
+
+    <figure class="diagram" aria-label="Architecture diagram">
+      <svg viewBox="0 0 960 400" role="img">
+        <title>null_gate architecture</title>
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrowhead"/></marker>
+        </defs>
+        <!-- LAN boundary -->
+        <rect x="10" y="10" width="640" height="380" rx="18" class="zone"/>
+        <text x="30" y="40" class="zone-label">YOUR LOCAL NETWORK</text>
+
+        <!-- devices -->
+        <g class="node"><rect x="30" y="70" width="170" height="70" rx="12"/><text x="115" y="100" class="t">Browser</text><text x="115" y="122" class="s">laptop · phone · TV</text></g>
+        <g class="node"><rect x="30" y="290" width="170" height="70" rx="12"/><text x="115" y="320" class="t">Home Assistant</text><text x="115" y="342" class="s">lights · cameras · media</text></g>
+
+        <!-- container -->
+        <rect x="260" y="60" width="370" height="310" rx="16" class="box"/>
+        <text x="280" y="88" class="box-label">null_gate container</text>
+        <g class="node hi"><rect x="280" y="104" width="160" height="62" rx="10"/><text x="360" y="131" class="t">Web UI</text><text x="360" y="151" class="s">plain JS · no build</text></g>
+        <g class="node hi"><rect x="452" y="104" width="160" height="62" rx="10"/><text x="532" y="131" class="t">Python API</text><text x="532" y="151" class="s">stdlib only</text></g>
+        <g class="node"><rect x="280" y="190" width="332" height="62" rx="10"/><text x="446" y="217" class="t">Supervisor</text><text x="446" y="237" class="s">health check · automatic rollback</text></g>
+        <g class="node data"><rect x="280" y="278" width="332" height="74" rx="10"/><text x="446" y="306" class="t">./data on your server</text><text x="446" y="328" class="s">dashboard.json · backups · tokens stay here</text></g>
+
+        <!-- internet -->
+        <text x="690" y="40" class="zone-label">INTERNET (OUTBOUND ONLY)</text>
+        <g class="node out"><rect x="690" y="70" width="250" height="62" rx="12"/><text x="815" y="97" class="t">GitHub Releases</text><text x="815" y="117" class="s">version checks and updates</text></g>
+        <g class="node out"><rect x="690" y="160" width="250" height="62" rx="12"/><text x="815" y="187" class="t">Open-Meteo</text><text x="815" y="207" class="s">weather, no key</text></g>
+        <g class="node out"><rect x="690" y="250" width="250" height="62" rx="12"/><text x="815" y="277" class="t">GitHub API</text><text x="815" y="297" class="s">optional repo tile</text></g>
+
+        <!-- arrows -->
+        <path d="M200 105 H278" class="flow" marker-end="url(#ar)"/>
+        <text x="239" y="96" class="lbl">:8088</text>
+        <path d="M440 135 H450" class="flow" marker-end="url(#ar)"/>
+        <path d="M532 166 V188" class="flow" marker-end="url(#ar)"/>
+        <path d="M446 252 V276" class="flow" marker-end="url(#ar)"/>
+        <path d="M278 330 H202" class="flow" marker-end="url(#ar)"/>
+        <text x="239" y="321" class="lbl">token</text>
+        <path d="M612 120 C650 120 650 101 688 101" class="flow dash" marker-end="url(#ar)"/>
+        <path d="M612 140 C655 140 650 191 688 191" class="flow dash" marker-end="url(#ar)"/>
+        <path d="M612 155 C665 155 650 281 688 281" class="flow dash" marker-end="url(#ar)"/>
+      </svg>
+    </figure>
+
+    <div class="kicker sub">WHAT HAPPENS ON AN UPDATE</div>
+    <ol class="pipeline">
+      <li><b>Check</b><span>Looks for a newer stable release every hour.</span></li>
+      <li><b>Validate</b><span>Fetches the exact tag and runs its self-tests in a temporary worktree.</span></li>
+      <li><b>Snapshot</b><span>Saves your dashboard to <code>data/backups/</code>.</span></li>
+      <li><b>Switch</b><span>Fast-forwards the code and restarts the service.</span></li>
+      <li><b>Verify</b><span>The supervisor waits for the health check. If it fails, the old code comes back with your data intact.</span></li>
+    </ol>
+
+    <div class="local-grid">
+      <div class="local-card">
+        <div><span>RUNTIME</span><b>Docker + Python 3.12</b></div>
+        <div><span>ACCESS</span><b class="mint">Local network only</b></div>
+        <div><span>DATA</span><b>JSON + snapshots in ./data</b></div>
+        <div><span>DOCKER SOCKET</span><b>Not needed</b></div>
+        <div><span>PRIVILEGES</span><b>Non-root, all caps dropped</b></div>
+      </div>
+      <p class="smallprint">null_gate has no login. It is built for a trusted home network: it binds to your LAN address, refuses public clients and checks Host and Origin on every change. Anyone who can reach it can edit it, so never forward its port to the internet.</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="install">
+  <div class="kicker">A FEW COMMANDS OVER SSH</div>
+  <div class="section-intro">
+    <h2>Up and running in a minute.</h2>
+    <p>You need a Linux server with Docker Engine, Docker Compose v2 and Git. SSH in and run:</p>
+  </div>
+  <div class="install-grid">
+    <div class="terminal">
+      <div class="terminal-head"><span>you@server: ~</span><button id="copyInstall" type="button">Copy commands</button></div>
+<pre><span class="p">$</span> <span id="installCommands">git clone https://github.com/bhxuk/null_gate.git
+cd null_gate
+bash install.sh</span>
+
+<span class="c">  ▦  <b>null_gate</b>  ▌</span>
+<span class="d">  ─────────────────────────────────────────</span>
+  Your links, apps and smart home in one place.
+  Designed by <b>bhxuk.com</b>  ·  github.com/bhxuk/null_gate
+<span class="d">  ─────────────────────────────────────────</span>
+
+<span class="c">›</span> Checking Docker, Compose and Git
+<span class="c">›</span> Creating .env
+<span class="c">›</span> Building and starting the container
+
+<span class="g">  ✓ null_gate is running</span>
+
+    Open   <b>http://192.168.1.20:8088</b></pre>
+    </div>
+    <div class="install-notes">
+      <div><span>01</span><p><b>Run the installer.</b>It finds your LAN address, user and time zone, writes <code>.env</code> and starts the container.</p></div>
+      <div><span>02</span><p><b>Open the address it prints.</b>Add links, import bookmarks or click <em>Server apps</em> to add your homelab in one go.</p></div>
+      <div><span>03</span><p><b>Connect Home Assistant (optional).</b>Paste its address and a long-lived token in Settings → Smart home.</p></div>
+      <div><span>04</span><p><b>Forget about it.</b>Updates install themselves. Turn that off any time in Settings → Updates.</p></div>
+    </div>
+  </div>
+  <div class="install-links">
+    <a href="https://github.com/bhxuk/null_gate#install">Full install guide ↗</a>
+    <a href="https://github.com/bhxuk/null_gate#manual-docker-compose-setup">Manual Docker Compose ↗</a>
+    <a href="https://github.com/bhxuk/null_gate/releases/latest">Latest release ↗</a>
+    <a href="https://github.com/bhxuk/null_gate/blob/main/CHANGELOG.md">Changelog ↗</a>
+  </div>
+</section>
+
+<section class="wrap closing">
+  <span class="logo-mark"><img src="icon.svg" width="56" height="56" alt=""></span>
+  <h2>A little more organised.<br>A lot more you.</h2>
+  <p>Free and open source under the MIT licence.</p>
+  <div class="cta"><a class="button primary" href="#install">Install null_gate</a><a class="button" href="https://github.com/bhxuk/null_gate">Star on GitHub ↗</a></div>
+</section>
+
+</main>
+
+<footer class="wrap foot">
+  <a class="logo" href="#"><img src="icon.svg" width="22" height="22" alt="">null_gate</a>
+  <span>Designed by <a href="https://bhxuk.com">bhxuk.com</a> · <a href="https://github.com/bhxuk/null_gate/blob/main/LICENSE">MIT licence</a></span>
+  <a href="https://github.com/bhxuk/null_gate/releases" id="releaseLink">Releases ↗</a>
+</footer>
+</body>
+</html>
